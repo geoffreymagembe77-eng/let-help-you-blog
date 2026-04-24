@@ -115,6 +115,95 @@ create table if not exists public.subscriptions (
 
 alter table public.subscriptions enable row level security;
 
+-- 11. Communities
+create table if not exists public.communities (
+    id uuid default uuid_generate_v4() primary key,
+    name text not null,
+    description text,
+    category text,
+    member_count int default 0,
+    image_url text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.communities enable row level security;
+create policy "Anyone can view communities" on public.communities for select using (true);
+
+-- 12. Community Posts
+create table if not exists public.community_posts (
+    id uuid default uuid_generate_v4() primary key,
+    community_id uuid references public.communities(id) on delete cascade,
+    author_id uuid references public.profiles(id) on delete cascade,
+    content text not null,
+    image_url text,
+    likes_count int default 0,
+    comments_count int default 0,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.community_posts enable row level security;
+create policy "Anyone can view posts" on public.community_posts for select using (true);
+create policy "Users can create posts" on public.community_posts for insert with check (auth.uid() = author_id);
+
+-- 13. Consultants
+create table if not exists public.consultants (
+    id uuid references public.profiles(id) on delete cascade primary key,
+    title text not null,
+    bio text,
+    rating decimal default 5.0,
+    reviews_count int default 0,
+    price_per_session text,
+    availability_status text,
+    specialties text[],
+    image_url text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.consultants enable row level security;
+create policy "Anyone can view consultants" on public.consultants for select using (true);
+
+-- 14. Appointments (Virtual Hub)
+create table if not exists public.appointments (
+    id uuid default uuid_generate_v4() primary key,
+    patient_id uuid references public.profiles(id) on delete cascade,
+    provider_id uuid references public.profiles(id) on delete cascade,
+    scheduled_at timestamp with time zone not null,
+    status text check (status in ('scheduled', 'completed', 'canceled')) default 'scheduled',
+    type text, -- 'video', 'audio', 'chat'
+    meeting_link text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.appointments enable row level security;
+create policy "Users view their own appointments" on public.appointments for select using (auth.uid() = patient_id or auth.uid() = provider_id);
+
+-- 15. AI Predictions
+create table if not exists public.ai_predictions (
+    id uuid default uuid_generate_v4() primary key,
+    patient_id uuid references public.profiles(id) on delete cascade,
+    prediction_type text not null, -- 'diabetes_risk', 'hypertension_risk'
+    score int not null,
+    risk_level text,
+    confidence_score decimal,
+    analysis_notes text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.ai_predictions enable row level security;
+create policy "Patients view their own predictions" on public.ai_predictions for select using (auth.uid() = patient_id);
+
+-- 16. Site Content (CMS)
+create table if not exists public.site_content (
+    key text primary key,
+    value text not null,
+    category text,
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.site_content enable row level security;
+create policy "Anyone can view site content" on public.site_content for select using (true);
+create policy "Admins can manage site content" on public.site_content for all using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
+
 -- 10. Indexes for performance
 create index if not exists idx_topics_specialty on public.topics(specialty_id);
 create index if not exists idx_content_topic on public.content(topic_id);
@@ -124,7 +213,7 @@ create index if not exists idx_ai_profiles_patient on public.ai_educator_profile
 create index if not exists idx_links_provider on public.provider_patient_links(provider_id);
 create index if not exists idx_links_patient on public.provider_patient_links(patient_id);
 
--- RLS POLICIES
+-- RLS POLICIES (Remaining)
 
 -- Profiles
 create policy "Public profiles are viewable by everyone" on public.profiles for select using (true);

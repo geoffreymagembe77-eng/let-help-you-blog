@@ -21,7 +21,17 @@ import {
   Send,
   User,
   MoreVertical,
-  Plus
+  Plus,
+  CheckCircle2, 
+  PlayCircle, 
+  Globe, 
+  Stethoscope, 
+  Sparkles,
+  Video,
+  ShieldCheck,
+  Star,
+  Award,
+  Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -33,29 +43,45 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Language, translations } from '@/lib/languages';
 
+// Import New Hubs
+import { AIAnalytics } from '@/components/dashboard/AIAnalytics';
+import { CommunityHub } from '@/components/dashboard/CommunityHub';
+import { ConsultancyHub } from '@/components/dashboard/ConsultancyHub';
+import { VirtualHub } from '@/components/dashboard/VirtualHub';
+
 // --- Dashboard Layout ---
 
 export const DashboardLayout = ({ 
   children, 
   activeTab, 
   setActiveTab,
-  userRole = 'patient'
+  userRole = 'patient',
+  currentLang,
+  onLogout
 }: { 
   children: React.ReactNode; 
   activeTab: string; 
   setActiveTab: (tab: string) => void;
-  userRole?: 'patient' | 'provider' | 'admin'
+  userRole?: 'patient' | 'provider' | 'admin';
+  currentLang: Language;
+  onLogout: () => void;
 }) => {
+  const t = translations[currentLang];
+  
   const sidebarItems = [
     { id: 'overview', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Overview' },
-    { id: 'education', icon: <BookOpen className="w-5 h-5" />, label: 'Education Hub' },
-    { id: 'ai', icon: <MessageSquare className="w-5 h-5" />, label: 'AI Educator' },
-    { id: 'trends', icon: <Activity className="w-5 h-5" />, label: 'Health Trends' },
+    { id: 'education', icon: <BookOpen className="w-5 h-5" />, label: t.educationHub },
+    { id: 'ai_chat', icon: <MessageSquare className="w-5 h-5" />, label: t.aiEducator },
+    { id: 'ai_insights', icon: <Sparkles className="w-5 h-5" />, label: t.aiPredictions },
+    { id: 'community', icon: <Users className="w-5 h-5" />, label: t.community },
+    { id: 'virtual', icon: <Video className="w-5 h-5" />, label: t.virtualHub },
+    { id: 'consultancy', icon: <ShieldCheck className="w-5 h-5" />, label: t.consultancy },
+    { id: 'trends', icon: <Activity className="w-5 h-5" />, label: t.healthTrends },
   ];
 
   if (userRole === 'provider') {
-    sidebarItems.push({ id: 'patients', icon: <Users className="w-5 h-5" />, label: 'My Patients' });
-    sidebarItems.push({ id: 'analytics', icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics' });
+    sidebarItems.splice(4, 0, { id: 'patients', icon: <Users className="w-5 h-5" />, label: 'My Patients' });
+    sidebarItems.push({ id: 'analytics', icon: <BarChart3 className="w-5 h-5" />, label: t.analytics });
   }
 
   return (
@@ -79,7 +105,10 @@ export const DashboardLayout = ({
           ))}
         </div>
         <div className="p-4 border-t border-slate-100">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors">
+          <button 
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             Logout
           </button>
@@ -89,7 +118,7 @@ export const DashboardLayout = ({
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         <ScrollArea className="flex-1 p-4 md:p-8">
-          <div className="max-w-5xl mx-auto pb-20">
+          <div className="max-w-6xl mx-auto pb-20">
             {children}
           </div>
         </ScrollArea>
@@ -97,7 +126,7 @@ export const DashboardLayout = ({
 
       {/* Mobile Nav - Bottom Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around py-3 px-2 z-50">
-        {sidebarItems.map(item => (
+        {sidebarItems.slice(0, 5).map(item => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
@@ -356,23 +385,12 @@ const AIEducator = () => {
               placeholder="Ask anything about your health..." 
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               className="flex-1 rounded-full bg-slate-50 focus-visible:ring-emerald-500"
             />
             <Button onClick={handleSend} className="rounded-full bg-emerald-600 w-10 h-10 p-0">
               <Send className="w-4 h-4" />
             </Button>
-          </div>
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {["Diet tips", "Medication help", "Exercise ideas", "Explain Swahili"].map(tag => (
-              <button 
-                key={tag}
-                onClick={() => setInput(tag)}
-                className="px-3 py-1.5 rounded-full border border-slate-200 text-[10px] font-medium text-slate-500 whitespace-nowrap hover:border-emerald-500 hover:text-emerald-600"
-              >
-                {tag}
-              </button>
-            ))}
           </div>
         </div>
       </Card>
@@ -439,26 +457,6 @@ const HealthTrends = () => {
           </div>
         </Card>
       </div>
-
-      <div className="space-y-4">
-        <h3 className="font-bold text-slate-900">Provider Connection</h3>
-        <Card className="p-4 border-emerald-100 bg-emerald-50/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center">
-                <Stethoscope className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <p className="font-bold text-slate-900">Dr. Kofi Mensah</p>
-                <p className="text-xs text-slate-500">Lagos General Hospital • Linked since Jan 2024</p>
-              </div>
-            </div>
-            <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50">
-              Message Doctor
-            </Button>
-          </div>
-        </Card>
-      </div>
     </div>
   );
 };
@@ -494,17 +492,13 @@ const ProviderPatients = () => {
             <tr>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Patient</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Condition</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Education Progress</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {[
-              { name: "Kwesi Mensah", age: 45, disease: "Diabetes Type II", progress: 72, status: "Active", risk: "Low" },
-              { name: "Ayo Balogun", age: 62, disease: "Hypertension", progress: 15, status: "Inactive", risk: "High" },
-              { name: "Zainab Yusuf", age: 28, disease: "Antenatal", progress: 90, status: "Active", risk: "Low" },
-              { name: "Fatima Bello", age: 53, disease: "Cardiovascular", progress: 40, status: "Active", risk: "Medium" },
+              { name: "Kwesi Mensah", age: 45, disease: "Diabetes Type II", progress: 72, risk: "Low" },
+              { name: "Ayo Balogun", age: 62, disease: "Hypertension", progress: 15, risk: "High" },
             ].map((p, i) => (
               <tr key={i} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4">
@@ -520,24 +514,6 @@ const ProviderPatients = () => {
                 </td>
                 <td className="px-6 py-4">
                   <Badge variant="outline" className="text-xs font-medium border-slate-200">{p.disease}</Badge>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="w-32">
-                    <div className="flex justify-between text-[10px] mb-1">
-                      <span>Progress</span>
-                      <span>{p.progress}%</span>
-                    </div>
-                    <Progress value={p.progress} className="h-1.5" />
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <Badge className={`border-none ${
-                    p.risk === 'High' ? 'bg-red-100 text-red-700' : 
-                    p.risk === 'Medium' ? 'bg-orange-100 text-orange-700' : 
-                    'bg-emerald-100 text-emerald-700'
-                  }`}>
-                    {p.risk} Risk
-                  </Badge>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button className="text-slate-400 hover:text-slate-600">
@@ -557,55 +533,50 @@ const ProviderPatients = () => {
 
 export const DashboardPage = ({ 
   currentLang, 
-  role = 'patient' 
+  role = 'patient',
+  onLogout
 }: { 
   currentLang: Language; 
-  role?: 'patient' | 'provider' 
+  role?: 'patient' | 'provider';
+  onLogout: () => void;
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const renderContent = () => {
-    if (role === 'patient') {
-      switch (activeTab) {
-        case 'overview': return <Overview />;
-        case 'education': return <EducationHub />;
-        case 'ai': return <AIEducator />;
-        case 'trends': return <HealthTrends />;
-        default: return <Overview />;
-      }
-    } else {
-      switch (activeTab) {
-        case 'overview': return <div className="space-y-6">
-          <h1 className="text-2xl font-bold">Institution Analytics</h1>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-             {[
-               { label: 'Total Patients', val: '1,284', change: '+5%' },
-               { label: 'Edu Completion', val: '68%', change: '+12%' },
-               { label: 'Avg Health Score', val: '8.4/10', change: '+2%' },
-               { label: 'Staff Active', val: '42', change: '0%' },
-             ].map((stat, i) => (
-               <Card key={i} className="p-4">
-                 <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
-                 <p className="text-xl font-bold mt-1">{stat.val}</p>
-                 <p className="text-[10px] text-emerald-600 font-bold mt-1">{stat.change} ↑</p>
-               </Card>
-             ))}
-          </div>
-          <Card className="h-80 flex items-center justify-center border-dashed text-slate-400">
-             Institutional Trend Graph Here
-          </Card>
-        </div>;
-        case 'patients': return <ProviderPatients />;
-        default: return <ProviderPatients />;
-      }
+    switch (activeTab) {
+      case 'overview': return <Overview />;
+      case 'education': return <EducationHub />;
+      case 'ai_chat': return <AIEducator />;
+      case 'ai_insights': return <AIAnalytics />;
+      case 'community': return <CommunityHub />;
+      case 'virtual': return <VirtualHub />;
+      case 'consultancy': return <ConsultancyHub />;
+      case 'trends': return <HealthTrends />;
+      case 'patients': return <ProviderPatients />;
+      case 'analytics': return <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Institution Analytics</h1>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+           {[
+             { label: 'Total Patients', val: '1,284', change: '+5%' },
+             { label: 'Edu Completion', val: '68%', change: '+12%' },
+             { label: 'Avg Health Score', val: '8.4/10', change: '+2%' },
+             { label: 'Staff Active', val: '42', change: '0%' },
+           ].map((stat, i) => (
+             <Card key={i} className="p-4">
+               <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
+               <p className="text-xl font-bold mt-1">{stat.val}</p>
+               <p className="text-[10px] text-emerald-600 font-bold mt-1">{stat.change} ↑</p>
+             </Card>
+           ))}
+        </div>
+      </div>;
+      default: return <Overview />;
     }
   };
 
   return (
-    <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} userRole={role}>
+    <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} userRole={role} currentLang={currentLang} onLogout={onLogout}>
       {renderContent()}
     </DashboardLayout>
   );
 };
-
-import { CheckCircle2, PlayCircle, Globe, Stethoscope, Sparkles } from 'lucide-react';
