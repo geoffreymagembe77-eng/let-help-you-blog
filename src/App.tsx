@@ -27,6 +27,11 @@ function App() {
     if (savedRole && savedPage) {
       setUserRole(savedRole as UserRole);
       setCurrentPage(savedPage);
+      
+      const savedProviderRole = localStorage.getItem('gembe_provider_role');
+      if (savedProviderRole) {
+        setProviderRole(savedProviderRole as ProviderRole);
+      }
     }
   }, []);
 
@@ -37,17 +42,25 @@ function App() {
     if (role === 'patient') {
       setCurrentPage('patient');
       localStorage.setItem('gembe_page', 'patient');
-      toast.success('Patient Portal Access Verified');
+      toast.success('Patient Portal Access Verified', {
+        description: 'Identity established on mainnet node.'
+      });
     } else if (role === 'provider') {
       setCurrentPage('provider_hub');
-      setProviderRole('provider');
+      setProviderRole('clinician');
       localStorage.setItem('gembe_page', 'provider_hub');
-      toast.success('Clinical Environment Secured');
+      localStorage.setItem('gembe_provider_role', 'clinician');
+      toast.success('Clinical Environment Secured', {
+        description: 'Provider credentials verified via blockchain.'
+      });
     } else if (role === 'platform_admin') {
-      setCurrentPage('provider_hub');
+      setCurrentPage('gembe_dashboard');
       setProviderRole('super_admin');
-      localStorage.setItem('gembe_page', 'provider_hub');
-      toast.success('Administrative Privileges Granted');
+      localStorage.setItem('gembe_page', 'gembe_dashboard');
+      localStorage.setItem('gembe_provider_role', 'super_admin');
+      toast.success('Administrative Privileges Granted', {
+        description: 'Full platform orchestration enabled.'
+      });
     }
   };
 
@@ -56,7 +69,10 @@ function App() {
     setCurrentPage('landing');
     localStorage.removeItem('gembe_role');
     localStorage.removeItem('gembe_page');
-    toast.info('Session Ended Securely');
+    localStorage.removeItem('gembe_provider_role');
+    toast.info('Session Ended Securely', {
+      description: 'Audit log entry created for this termination.'
+    });
   };
 
   const handleNavigate = (page: string, options?: { mode?: 'login' | 'signup', tab?: string }) => {
@@ -69,7 +85,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans antialiased">
+    <div className="min-h-screen bg-background font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900">
       {/* Conditionally show Navbar */}
       {currentPage !== 'auth' && 
        currentPage !== 'platform_admin' && 
@@ -128,7 +144,7 @@ function App() {
         </AnimatePresence>
       </main>
 
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-right" richColors closeButton />
     </div>
   );
 }

@@ -3,20 +3,16 @@ import { motion } from 'framer-motion';
 import { 
   ArrowRight, 
   ShieldCheck, 
-  Users, 
   Sparkles, 
-  Stethoscope, 
   Globe, 
-  Activity,
-  BookOpen,
   Video,
-  Lock,
-  CheckCircle2
+  Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Language, translations } from '@/lib/languages';
+import { useContent } from '@/hooks/use-content';
 
 const IMAGES = {
   hero: "https://storage.googleapis.com/dala-prod-public-storage/generated-images/5df26582-d38a-4e79-a7a8-2ec65fc75dda/mobile-app-preview-59df2f63-1777039523338.webp",
@@ -30,7 +26,16 @@ export const LandingPage = ({
   currentLang: Language; 
   onNavigate: (page: string, options?: any) => void; 
 }) => {
-  const t = translations[currentLang];
+  const { content } = useContent({
+    hero_title: "Empowering African Health Journeys.",
+    hero_subtitle: "The most advanced AI-driven patient education platform designed for the African context, ensuring secure, accessible, and verified healthcare for all.",
+    hero_cta_primary: "Start Your Journey",
+    hero_cta_secondary: "Provider Access",
+    stat_users_val: "100k+",
+    stat_users_label: "Active Patients",
+    stat_accuracy_val: "98%",
+    stat_countries_val: "12+"
+  });
 
   const features = [
     { 
@@ -60,7 +65,7 @@ export const LandingPage = ({
   ];
 
   return (
-    <div className="relative overflow-hidden font-sans">
+    <div className="relative overflow-hidden font-sans bg-white">
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40 bg-[#F8FAFC]">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-cyan-500/5 blur-[120px] rounded-full -mr-48 -mt-48" />
@@ -76,25 +81,25 @@ export const LandingPage = ({
               <Badge className="bg-cyan-50 text-cyan-700 border-none px-4 py-1.5 font-black uppercase tracking-widest text-[11px] mb-8">
                 <Lock className="w-3.5 h-3.5 mr-2" /> ISO 27001 SECURE PLATFORM
               </Badge>
-              <h1 className="text-6xl lg:text-8xl font-black text-slate-900 leading-[1.05] tracking-tight mb-8">
-                Empowering <span className="text-cyan-600">African</span> Health Journeys.
+              <h1 className="text-6xl lg:text-8xl font-black text-slate-900 leading-[1.05] tracking-tight mb-8 whitespace-pre-line">
+                {content.hero_title}
               </h1>
               <p className="text-xl text-slate-500 font-medium leading-relaxed mb-12 max-w-xl">
-                The most advanced AI-driven patient education platform designed for the African context, ensuring secure, accessible, and verified healthcare for all.
+                {content.hero_subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-6">
                 <Button 
                   onClick={() => onNavigate('auth', { mode: 'signup', tab: 'patient' })}
                   className="h-16 px-10 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-xl shadow-2xl shadow-slate-200 transition-all active:scale-95 group"
                 >
-                  Start Your Journey <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  {content.hero_cta_primary} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => onNavigate('auth', { mode: 'login', tab: 'provider' })}
                   className="h-16 px-10 border-slate-200 text-slate-900 rounded-2xl font-black text-xl hover:bg-slate-50 transition-all active:scale-95"
                 >
-                  Provider Access
+                  {content.hero_cta_secondary}
                 </Button>
               </div>
             </motion.div>
@@ -162,10 +167,10 @@ export const LandingPage = ({
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-4 gap-12 text-center">
             {[ 
-              { label: "Active Patients", val: "100k+" },
+              { label: content.stat_users_label, val: content.stat_users_val },
               { label: "Hospitals Integrated", val: "450+" },
               { label: "Educations Delivered", val: "1.2M" },
-              { label: "Security Rating", val: "A+" }
+              { label: "AI Accuracy", val: content.stat_accuracy_val }
             ].map((s, i) => (
               <div key={i}>
                 <p className="text-5xl lg:text-7xl font-black text-cyan-400 mb-2">{s.val}</p>

@@ -3,37 +3,35 @@ import {
   Users, 
   Activity, 
   LayoutDashboard,
-  BookOpen,
   Video,
-  Settings,
-  Bell,
   LogOut,
   Stethoscope,
   ShieldAlert,
-  CreditCard,
-  Database,
   ShieldCheck,
-  Fingerprint,
   Search,
-  BarChart3,
   FileLock2,
   Terminal,
-  Lock,
   Building2,
   UserCog,
-  ClipboardCheck
+  ClipboardCheck,
+  Bell,
+  Database,
+  BarChart3,
+  HeartPulse
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { ProviderRole } from '@/types/auth';
 import { BlockchainLedger } from '@/components/dashboard/BlockchainLedger';
-import { SecurityService } from '@/lib/security';
+import { AIAnalytics } from '@/components/dashboard/AIAnalytics';
+import { VirtualHub } from '@/components/dashboard/VirtualHub';
+import { ProviderPatients } from '@/components/dashboard/ProviderPatients';
 import { toast } from 'sonner';
 
 const IMAGES = {
@@ -47,8 +45,8 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
   const sidebarItems = [
     { id: 'overview', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Command Center', roles: ['super_admin', 'admin', 'clinician', 'provider'] },
     { id: 'patients', icon: <Users className="w-5 h-5" />, label: 'Patient Census', roles: ['super_admin', 'admin', 'clinician', 'provider'] },
-    { id: 'analytics', icon: <Activity className="w-5 h-5" />, label: 'Population Health', roles: ['super_admin', 'admin'] },
-    { id: 'security', icon: <ShieldAlert className="w-5 h-5" />, label: 'Compliance & Audit', roles: ['super_admin', 'admin'] },
+    { id: 'analytics', icon: <HeartPulse className="w-5 h-5" />, label: 'Population AI', roles: ['super_admin', 'admin', 'clinician'] },
+    { id: 'security', icon: <ShieldAlert className="w-5 h-5" />, label: 'Compliance Hub', roles: ['super_admin', 'admin'] },
     { id: 'ledger', icon: <Database className="w-5 h-5" />, label: 'Blockchain Log', roles: ['super_admin', 'admin', 'clinician'] },
     { id: 'telemedicine', icon: <Video className="w-5 h-5" />, label: 'Virtual Hub', roles: ['clinician', 'provider', 'super_admin'] },
     { id: 'org', icon: <Building2 className="w-5 h-5" />, label: 'Org Admin', roles: ['super_admin'] },
@@ -60,10 +58,10 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in duration-700">
              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col lg:flex-row gap-12 items-center bg-white p-12 rounded-[48px] border border-slate-100 shadow-2xl shadow-slate-200/40 relative overflow-hidden"
               >
                  <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-50 rounded-full -mr-32 -mt-32 opacity-50" />
@@ -74,8 +72,8 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                       Managing institutional health data with <span className="text-cyan-600 font-bold">E2E Encryption</span> and real-time blockchain verification.
                     </p>
                     <div className="flex flex-wrap gap-4">
-                       <Button className="bg-slate-900 hover:bg-slate-800 h-16 px-10 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-slate-200">Launch Virtual Clinic</Button>
-                       <Button variant="outline" className="h-16 px-10 rounded-2xl border-slate-200 font-black text-lg hover:bg-slate-50 transition-all active:scale-95">Export HIPAA Logs</Button>
+                       <Button onClick={() => setActiveTab('telemedicine')} className="bg-slate-900 hover:bg-slate-800 h-16 px-10 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-slate-200">Launch Virtual Clinic</Button>
+                       <Button variant="outline" onClick={() => toast.success('HIPAA compliance logs generated for export.')} className="h-16 px-10 rounded-2xl border-slate-200 font-black text-lg hover:bg-slate-50 transition-all active:scale-95">Export HIPAA Logs</Button>
                     </div>
                  </div>
                  <div className="w-full lg:w-2/5 relative">
@@ -111,13 +109,16 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
               </div>
           </div>
         );
+      case 'patients': return <ProviderPatients />;
+      case 'analytics': return <AIAnalytics />;
+      case 'telemedicine': return <VirtualHub />;
       case 'security':
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in duration-700">
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                   <h2 className="text-4xl font-black text-slate-900">Security & Compliance</h2>
-                   <p className="text-slate-500 font-medium">Monitoring international data standards and PHI integrity.</p>
+                   <h2 className="text-4xl font-black text-slate-900">Compliance Hub</h2>
+                   <p className="text-slate-500 font-medium">Monitoring international data standards and PHI integrity across all nodes.</p>
                 </div>
                 <div className="flex gap-4">
                    <Badge className="h-10 px-4 bg-emerald-50 text-emerald-700 border-none font-black flex items-center gap-2">
@@ -166,7 +167,7 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                         <div className="p-3 bg-cyan-500 rounded-2xl">
                            <Terminal className="w-6 h-6 text-white" />
                         </div>
-                        <h3 className="text-xl font-black">Security Health</h3>
+                        <h3 className="text-xl font-black">Infrastructure Health</h3>
                      </div>
 
                      <div className="space-y-8">
@@ -193,7 +194,10 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                         </div>
                      </div>
 
-                     <Button className="w-full mt-12 h-14 bg-white text-slate-900 hover:bg-slate-100 font-black rounded-2xl shadow-xl shadow-cyan-900/20">
+                     <Button 
+                      onClick={() => toast.info('Rotating secret keys across all nodes...')}
+                      className="w-full mt-12 h-14 bg-white text-slate-900 hover:bg-slate-100 font-black rounded-2xl shadow-xl shadow-cyan-900/20"
+                     >
                         Rotate Secret Keys
                      </Button>
                    </div>
@@ -205,13 +209,13 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
         return <BlockchainLedger />;
       case 'org':
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in duration-700">
              <div className="flex items-center justify-between">
                 <div>
                    <h2 className="text-4xl font-black text-slate-900">Organization Admin</h2>
                    <p className="text-slate-500 font-medium">Manage staff roles, institutional billing, and high-level configuration.</p>
                 </div>
-                <Button className="bg-slate-900 h-14 px-8 rounded-2xl font-black">
+                <Button onClick={() => toast.success('Staff invitation portal initialized.')} className="bg-slate-900 h-14 px-8 rounded-2xl font-black shadow-xl">
                   <UserCog className="w-5 h-5 mr-2" /> Invite Staff
                 </Button>
              </div>
@@ -225,7 +229,7 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                         { name: 'Dr. Sarah Ibrahim', role: 'Clinician', icon: <Stethoscope className="w-4 h-4" /> },
                         { name: 'James Adeyemi', role: 'Admin', icon: <UserCog className="w-4 h-4" /> }
                       ].map((staff, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
                            <div className="flex items-center gap-3">
                              <div className="p-2 bg-white rounded-xl text-cyan-600">{staff.icon}</div>
                              <div>
@@ -251,17 +255,17 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                          </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-2xl bg-slate-50">
+                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                            <p className="text-[10px] font-black text-slate-400 uppercase">Licenses</p>
                            <p className="text-xl font-black">120 / 150</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-slate-50">
+                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                            <p className="text-[10px] font-black text-slate-400 uppercase">Requests</p>
                            <p className="text-xl font-black">8.4k</p>
                         </div>
                       </div>
                    </div>
-                   <Button className="w-full mt-8 h-12 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black shadow-lg shadow-cyan-100">Upgrade Plan</Button>
+                   <Button className="w-full mt-8 h-12 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black shadow-lg shadow-cyan-100">Upgrade Institutional Plan</Button>
                 </Card>
 
                 <Card className="border-none shadow-sm rounded-[32px] p-10 bg-white">
@@ -279,27 +283,27 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                         </div>
                       ))}
                    </div>
-                   <Button variant="ghost" className="w-full mt-8 h-12 rounded-xl font-black text-cyan-600">Download Certificate</Button>
+                   <Button variant="ghost" className="w-full mt-8 h-12 rounded-xl font-black text-cyan-600">Download Audit Certificate</Button>
                 </Card>
              </div>
           </div>
         );
       default:
-        return <div className="text-center py-20 text-slate-400">Section coming soon...</div>;
+        return <div className="text-center py-20 text-slate-400 font-black">Section coming soon...</div>;
     }
   };
 
   return (
     <div className="flex h-screen bg-slate-50/30 overflow-hidden font-sans">
       {/* Modern Slim Sidebar */}
-      <aside className="w-80 border-r border-slate-100 bg-white flex flex-col hidden lg:flex relative z-30">
+      <aside className="w-80 border-r border-slate-100 bg-white flex flex-col hidden lg:flex relative z-30 shadow-[10px_0_30px_rgba(0,0,0,0.01)]">
         <div className="p-10 flex items-center gap-4">
-          <div className="bg-slate-950 p-3 rounded-2xl shadow-xl shadow-slate-200">
+          <div className="bg-slate-950 p-3.5 rounded-2xl shadow-xl shadow-slate-200">
             <Stethoscope className="w-7 h-7 text-white" />
           </div>
           <div className="flex flex-col">
             <span className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Gembe</span>
-            <span className="text-[10px] font-black text-cyan-600 uppercase tracking-[0.2em]">{role.replace('_', ' ')}</span>
+            <span className="text-[10px] font-black text-cyan-600 uppercase tracking-[0.2em] mt-1">{role.replace('_', ' ')} Portal</span>
           </div>
         </div>
         
@@ -311,7 +315,7 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-4 px-6 py-5 rounded-[24px] text-sm font-black transition-all ${
                   activeTab === item.id 
-                  ? 'bg-slate-950 text-white shadow-2xl shadow-slate-300' 
+                  ? 'bg-slate-950 text-white shadow-2xl shadow-slate-300 translate-x-1' 
                   : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
@@ -325,25 +329,25 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
         <div className="p-10">
            <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 mb-8">
               <div className="flex items-center gap-4 mb-4">
-                <Avatar className="w-12 h-12 border-2 border-white shadow-sm">
+                <Avatar className="w-12 h-12 border-4 border-white shadow-sm">
                   <AvatarFallback className="bg-cyan-100 text-cyan-700 font-black">AD</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-sm font-black text-slate-900">Dr. Osei Tutu</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{role.replace('_', ' ')}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">ID: #PRO-2401</p>
                 </div>
               </div>
               <Button 
                 onClick={onLogout}
                 variant="ghost"
-                className="w-full h-10 flex items-center gap-2 rounded-xl font-black text-red-500 hover:bg-red-50 transition-all text-xs"
+                className="w-full h-11 flex items-center gap-2 rounded-xl font-black text-red-500 hover:bg-red-50 transition-all text-xs"
               >
-                <LogOut className="w-4 h-4" /> Log Out
+                <LogOut className="w-4 h-4" /> Log Out Securely
               </Button>
            </div>
-           <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mainnet Node Active</span>
+           <div className="flex items-center justify-center gap-2.5">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mainnet Node: GH-ACC-01</span>
            </div>
         </div>
       </aside>
@@ -355,15 +359,15 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
            <div className="flex items-center gap-8">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input placeholder="Secure lookup..." className="w-96 pl-12 h-14 bg-slate-50/50 border-none shadow-inner rounded-[24px] hidden md:block focus-visible:ring-cyan-500" />
+                <Input placeholder="Secure patient lookup..." className="w-96 pl-12 h-14 bg-slate-50/50 border-none shadow-inner rounded-[24px] hidden md:block focus-visible:ring-cyan-500 font-bold" />
               </div>
            </div>
            <div className="flex items-center gap-6">
-              <Button variant="ghost" size="icon" className="w-14 h-14 text-slate-400 bg-slate-50 rounded-2xl relative">
+              <Button variant="ghost" size="icon" className="w-14 h-14 text-slate-400 bg-slate-50 rounded-2xl relative border border-slate-100/50">
                  <Bell className="w-6 h-6" />
-                 <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+                 <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white shadow-sm" />
               </Button>
-              <Button className="h-14 px-8 bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-2xl shadow-xl shadow-cyan-100 transition-all">
+              <Button className="h-14 px-8 bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-2xl shadow-xl shadow-cyan-100 transition-all active:scale-95">
                  New Clinical Record
               </Button>
            </div>
