@@ -1,7 +1,7 @@
 import { Language } from '../lib/languages';
 
 export type UserRole = 'patient' | 'provider' | 'platform_admin';
-export type ProviderRole = 'super_admin' | 'admin' | 'provider';
+export type ProviderRole = 'super_admin' | 'admin' | 'clinician' | 'provider';
 
 export interface UserSession {
   id: string;

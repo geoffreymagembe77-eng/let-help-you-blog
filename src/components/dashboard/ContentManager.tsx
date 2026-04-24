@@ -4,11 +4,8 @@ import {
   Save, 
   RotateCcw, 
   Layout, 
-  Type, 
-  Image as ImageIcon, 
-  Globe,
-  Settings,
-  Plus
+  RefreshCw,
+  Eye
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,32 +55,32 @@ export const ContentManager = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    const fetchContent = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('site_content')
-          .select('key, value');
+  const fetchContent = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('site_content')
+        .select('key, value');
 
-        if (error) {
-          toast.error('Failed to load content from database');
-          return;
-        }
-
-        const contentMap = data?.reduce((acc: Record<string, string>, item: any) => {
-          acc[item.key] = item.value;
-          return acc;
-        }, {}) || {};
-        
-        setFormData(contentMap);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      if (error) {
+        toast.error('Failed to load content from database');
+        return;
       }
-    };
 
+      const contentMap = data?.reduce((acc: Record<string, string>, item: any) => {
+        acc[item.key] = item.value;
+        return acc;
+      }, {}) || {};
+      
+      setFormData(contentMap);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchContent();
   }, []);
 
@@ -106,7 +103,7 @@ export const ContentManager = () => {
         if (error) throw error;
       }
 
-      toast.success(`${category.charAt(0).toUpperCase() + category.slice(1)} content updated successfully!`);
+      toast.success(`${category.charAt(0).toUpperCase() + category.slice(1)} content updated! Syncing across platform...`);
     } catch (err: any) {
       toast.error(`Error saving content: ${err.message}`);
     } finally {
@@ -120,8 +117,9 @@ export const ContentManager = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin" />
+        <p className="text-slate-500 font-bold animate-pulse">Fetching Real-time Content...</p>
       </div>
     );
   }
@@ -130,23 +128,31 @@ export const ContentManager = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center bg-slate-900 p-6 rounded-[32px] border border-slate-800">
         <div>
-          <h2 className="text-2xl font-black text-white">Website Content Manager</h2>
-          <p className="text-slate-500">Easily update landing page text and media without touching code.</p>
+          <h2 className="text-3xl font-black text-white flex items-center gap-3">
+            <Layout className="w-8 h-8 text-emerald-500" />
+            Website CMS
+          </h2>
+          <p className="text-slate-500 font-medium">Global content management with real-time blockchain-verified syncing.</p>
         </div>
-        <Button variant="outline" className="border-slate-800 text-slate-400 hover:text-white" onClick={() => window.location.reload()}>
-          <RotateCcw className="w-4 h-4 mr-2" /> Reset View
-        </Button>
+        <div className="flex gap-4">
+          <Button variant="outline" className="border-slate-800 text-slate-400 hover:text-white rounded-2xl h-12" onClick={fetchContent}>
+            <RotateCcw className="w-4 h-4 mr-2" /> Refresh
+          </Button>
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl h-12">
+            <Eye className="w-4 h-4 mr-2" /> Preview Site
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="hero" className="w-full">
-        <TabsList className="bg-slate-900 border border-slate-800 mb-8 w-full justify-start overflow-x-auto">
+        <TabsList className="bg-slate-900 border border-slate-800 mb-8 w-full justify-start overflow-x-auto p-1.5 h-14 rounded-2xl">
           {categories.map(cat => (
             <TabsTrigger 
               key={cat} 
               value={cat}
-              className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white capitalize"
+              className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white capitalize px-8 rounded-xl font-bold transition-all h-full"
             >
               {cat}
             </TabsTrigger>
@@ -155,22 +161,22 @@ export const ContentManager = () => {
 
         {categories.map(category => (
           <TabsContent key={category} value={category} className="space-y-6">
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-white capitalize">{category} Section Content</CardTitle>
-                <CardDescription className="text-slate-500">Modify the visible text for the {category} part of your landing page.</CardDescription>
+            <Card className="bg-slate-900 border-slate-800 rounded-[32px] overflow-hidden">
+              <CardHeader className="border-b border-slate-800 p-8 bg-slate-900/50">
+                <CardTitle className="text-2xl font-black text-white capitalize">{category} Configuration</CardTitle>
+                <CardDescription className="text-slate-500 font-bold">Modify the semantic content for the {category} module.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-6">
+              <CardContent className="p-8 space-y-8">
+                <div className="grid gap-8">
                   {CONTENT_SCHEMA.filter(f => f.category === category).map(field => (
-                    <div key={field.key} className="space-y-2">
-                      <Label htmlFor={field.key} className="text-slate-300 font-bold">{field.label}</Label>
+                    <div key={field.key} className="space-y-3">
+                      <Label htmlFor={field.key} className="text-slate-400 font-black uppercase tracking-widest text-[10px]">{field.label}</Label>
                       {field.type === 'textarea' ? (
                         <Textarea 
                           id={field.key}
                           value={formData[field.key] || ''}
                           onChange={(e) => handleChange(field.key, e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-white min-h-[100px]"
+                          className="bg-slate-950 border-slate-800 text-white min-h-[120px] rounded-2xl focus:ring-emerald-500 p-4 font-medium"
                           placeholder={`Enter ${field.label.toLowerCase()}...`}
                         />
                       ) : (
@@ -178,7 +184,7 @@ export const ContentManager = () => {
                           id={field.key}
                           value={formData[field.key] || ''}
                           onChange={(e) => handleChange(field.key, e.target.value)}
-                          className="bg-slate-800 border-slate-700 text-white"
+                          className="bg-slate-950 border-slate-800 h-14 text-white rounded-2xl focus:ring-emerald-500 px-4 font-medium"
                           placeholder={`Enter ${field.label.toLowerCase()}...`}
                         />
                       )}
@@ -186,13 +192,14 @@ export const ContentManager = () => {
                   ))}
                 </div>
                 
-                <div className="pt-4 border-t border-slate-800 flex justify-end">
+                <div className="pt-8 border-t border-slate-800 flex justify-between items-center">
+                  <p className="text-xs text-slate-600 font-bold">Last synced: {new Date().toLocaleTimeString()}</p>
                   <Button 
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-10 h-14 rounded-2xl shadow-xl shadow-emerald-900/20"
                     onClick={() => handleSave(category)}
                     disabled={saving}
                   >
-                    {saving ? 'Saving...' : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
+                    {saving ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5 mr-3" /> Push Changes</>}
                   </Button>
                 </div>
               </CardContent>

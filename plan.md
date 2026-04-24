@@ -1,49 +1,49 @@
-# Implementation Plan - GembeEduPro Enhancements
+# Implementation Plan - GembeEduPro "Professional & Secure" Transformation
 
-## 1. Fix Sign-Up and Auth Flow
-- **Goal**: Resolve the "sign up buttons not functioning" complaint.
-- **Action**: 
-    - Modify `src/pages/Auth.tsx` to include both Login and Register modes.
-    - Add a "Create Account" link/button in the auth card.
-    - Update `src/pages/LandingPage.tsx` buttons to pass a state/param to `AuthPage` if needed (or just ensure they land on the right page).
-
-## 2. Payment & Subscription Integration
-- **Goal**: Implement payment options as requested.
+## 1. Fix & Enhance Auth Flow (High Priority)
+- **Goal**: Resolve "sign up buttons not functioning" and eliminate "amateur" feel.
 - **Action**:
-    - Create `src/components/dashboard/PaymentManager.tsx` simulating a secure payment gateway (Stripe/Paystack style).
-    - Add pricing cards to the landing page and the patient dashboard.
-    - Integrate payment status in the user profile.
+    - Update `src/pages/Auth.tsx`:
+        - Implement a real OTP input component for the 2FA step (using `react-otp-input` or manual implementation).
+        - Add clear transitions between "Credential Entry" and "Security Verification".
+        - Enhance the visual polish with improved typography and micro-animations.
+        - Ensure all buttons have proper loading states and ARIA labels.
+        - Add "Password Strength" indicator for the signup flow.
 
-## 3. UI/UX "Catchy & Appealing" Overhaul
-- **Goal**: Move from "amateur" to world-class UI.
+## 2. Robust Payment Gateway Integration
+- **Goal**: Implement a multi-step, secure-feeling payment process.
 - **Action**:
-    - Apply `ui-ux-pro-max` healthcare palette (Emerald/Cyan/Slate).
-    - Use `framer-motion` for smoother page transitions and entry animations.
-    - Enhance typography using `Inter` and high-contrast headings.
-    - Add 3D-like shadows and glassmorphism to cards.
+    - Update `src/components/dashboard/PaymentManager.tsx`:
+        - Create a "Subscription Engine" with three distinct tiers.
+        - Implement a multi-step modal for checkout: [Plan Selection] -> [Payment Method (Stripe Simulation)] -> [Confirmation].
+        - Add real-time field validation for card details.
+        - Include "Enterprise" contact flow for institutional licenses.
 
-## 4. Blockchain & Security
-- **Goal**: Visible proof of secure data handling and blockchain integration.
+## 3. Provider Portal: Granular Role-Based Access (RBAC)
+- **Goal**: Tailor the dashboard for Super Admin, Provider Admin, and Clinician roles.
 - **Action**:
-    - Create `src/components/dashboard/BlockchainLedger.tsx` to show "Real-time Blockchain Verification" of records.
-    - Add security badges (ISO 27001, HIPAA) to footer and auth pages.
-    - Enhance 2FA verification UI with modern OTP inputs.
+    - Update `src/pages/ProviderDashboard.tsx`:
+        - Define `ProviderRole = 'super_admin' | 'admin' | 'clinician'`.
+        - `Super Admin`: Full access to Org Admin, Revenue, Staff Management, and Audit Logs.
+        - `Admin`: Access to Patient Census, Analytics, and Staff Scheduling.
+        - `Clinician`: Focused view on Patient Census, Virtual Hub, and Clinical Education.
+        - Implement a role-switcher for demo purposes or read from user state.
 
-## 5. Role-Based Access (Provider Portal)
-- **Goal**: Define 'Super Admin' and other roles in the provider portal.
+## 4. Security & International Compliance (HIPAA/GDPR)
+- **Goal**: Ensure the app reflects high security standards.
 - **Action**:
-    - Update `src/pages/ProviderDashboard.tsx` to check the `role` prop.
-    - Super Admins get an "Organization Overview" and "Staff Management" view.
-    - Standard Providers get the "Patient List" and "Consultations" view.
+    - Enhance `src/lib/security.ts`:
+        - Implement more realistic PHI data masking and encryption simulations.
+        - Add a "Security Audit" service that logs all high-risk actions.
+    - Add "Verified Secure" badges and tooltips explaining encryption methods (AES-256) throughout the dashboard.
 
-## 6. GembeEduPro Platform Dashboard
-- **Goal**: Dedicated dashboard for the overarching platform.
+## 5. UI/UX Polishing
+- **Goal**: Elevate the aesthetic to international standards.
 - **Action**:
-    - Create `src/pages/GembeEduProDashboard.tsx`.
-    - Features: Global stats (total users, revenue, blockchain txns), Hospital onboarding, Content moderation.
-    - Update `src/App.tsx` routing.
+    - Refine `src/index.css` with smoother transitions.
+    - Update `src/pages/LandingPage.tsx` with more engaging copy and sharper visual hierarchies.
+    - Ensure 100% responsiveness on mobile.
 
-## 7. Final Polish & Validation
-- **Action**: 
-    - Ensure all buttons in `Navbar.tsx` and `LandingPage.tsx` work.
-    - Run `validate_build` to ensure no TS errors.
+## 6. Technical Validation
+- Ensure all "Sign Up" and "Get Started" buttons across Landing Page, Navbar, and Auth work seamlessly.
+- Verify build integrity.

@@ -2,16 +2,9 @@ import React, { useState } from 'react';
 import { 
   Users, 
   Activity, 
-  TrendingUp, 
-  ChevronRight, 
-  Filter, 
-  Search, 
-  Plus, 
-  MoreVertical,
   LayoutDashboard,
   BookOpen,
   Video,
-  MessageSquare,
   Settings,
   Bell,
   LogOut,
@@ -19,10 +12,16 @@ import {
   ShieldAlert,
   CreditCard,
   Database,
-  BarChart3,
   ShieldCheck,
   Fingerprint,
-  ExternalLink
+  Search,
+  BarChart3,
+  FileLock2,
+  Terminal,
+  Lock,
+  Building2,
+  UserCog,
+  ClipboardCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -34,28 +33,28 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { ProviderRole } from '@/types/auth';
 import { BlockchainLedger } from '@/components/dashboard/BlockchainLedger';
+import { SecurityService } from '@/lib/security';
 import { toast } from 'sonner';
 
 const IMAGES = {
-  dashboard: "https://storage.googleapis.com/dala-prod-public-storage/generated-images/5df26582-d38a-4e79-a7a8-2ec65fc75dda/provider-dashboard-c635d0e0-1777031659359.webp"
+  dashboard: "https://storage.googleapis.com/dala-prod-public-storage/generated-images/5df26582-d38a-4e79-a7a8-2ec65fc75dda/dashboard-preview-ec16c8cb-1777039523616.webp",
+  blockchain: "https://storage.googleapis.com/dala-prod-public-storage/generated-images/5df26582-d38a-4e79-a7a8-2ec65fc75dda/medical-blockchain-586b93ba-1777039871861.webp"
 };
 
 export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: ProviderRole; onLogout: () => void }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const sidebarItems = [
-    { id: 'overview', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Provider Overview' },
-    { id: 'patients', icon: <Users className="w-5 h-5" />, label: 'Patient Census' },
-    { id: 'analytics', icon: <Activity className="w-5 h-5" />, label: 'Clinical Analytics' },
-    { id: 'ledger', icon: <ShieldCheck className="w-5 h-5" />, label: 'Health Ledger' },
-    { id: 'virtual', icon: <Video className="w-5 h-5" />, label: 'Telemedicine' },
-    { id: 'education', icon: <BookOpen className="w-5 h-5" />, label: 'Curriculum Mgr' },
-    { id: 'billing', icon: <CreditCard className="w-5 h-5" />, label: 'Institution Billing' },
+    { id: 'overview', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Command Center', roles: ['super_admin', 'admin', 'clinician', 'provider'] },
+    { id: 'patients', icon: <Users className="w-5 h-5" />, label: 'Patient Census', roles: ['super_admin', 'admin', 'clinician', 'provider'] },
+    { id: 'analytics', icon: <Activity className="w-5 h-5" />, label: 'Population Health', roles: ['super_admin', 'admin'] },
+    { id: 'security', icon: <ShieldAlert className="w-5 h-5" />, label: 'Compliance & Audit', roles: ['super_admin', 'admin'] },
+    { id: 'ledger', icon: <Database className="w-5 h-5" />, label: 'Blockchain Log', roles: ['super_admin', 'admin', 'clinician'] },
+    { id: 'telemedicine', icon: <Video className="w-5 h-5" />, label: 'Virtual Hub', roles: ['clinician', 'provider', 'super_admin'] },
+    { id: 'org', icon: <Building2 className="w-5 h-5" />, label: 'Org Admin', roles: ['super_admin'] },
   ];
 
-  if (role === 'super_admin') {
-    sidebarItems.push({ id: 'staff', icon: <ShieldAlert className="w-5 h-5" />, label: 'Staff Management' });
-  }
+  const visibleSidebarItems = sidebarItems.filter(item => item.roles.includes(role));
 
   const renderContent = () => {
     switch (activeTab) {
@@ -65,183 +64,223 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
              <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col md:flex-row gap-8 items-center bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden relative"
+                className="flex flex-col lg:flex-row gap-12 items-center bg-white p-12 rounded-[48px] border border-slate-100 shadow-2xl shadow-slate-200/40 relative overflow-hidden"
               >
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-50 rounded-full -mr-32 -mt-32 opacity-50" />
                  <div className="flex-1 relative z-10">
-                    <Badge className="bg-cyan-50 text-cyan-600 border-none mb-4 font-black uppercase tracking-widest text-[10px]">Institutional Access</Badge>
-                    <h1 className="text-4xl font-black text-slate-900 mb-2 tracking-tight">Good Morning, Dr. Osei</h1>
-                    <p className="text-slate-500 font-medium max-w-lg mb-8 text-lg">Your hospital has seen a <span className="text-emerald-600 font-bold">14% improvement</span> in patient education completion this month.</p>
+                    <Badge className="bg-emerald-50 text-emerald-700 border-none mb-6 font-black uppercase tracking-widest text-[10px] px-3 py-1">Operational Status: Active</Badge>
+                    <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tight">Portal Dashboard</h1>
+                    <p className="text-slate-500 font-medium max-w-lg mb-10 text-xl leading-relaxed">
+                      Managing institutional health data with <span className="text-cyan-600 font-bold">E2E Encryption</span> and real-time blockchain verification.
+                    </p>
                     <div className="flex flex-wrap gap-4">
-                       <Button className="bg-slate-900 hover:bg-slate-800 h-14 px-8 rounded-2xl font-black shadow-xl shadow-slate-200 transition-all active:scale-95">Start Virtual Rounds</Button>
-                       <Button variant="outline" className="h-14 px-8 rounded-2xl border-slate-200 font-black hover:bg-slate-50 transition-all active:scale-95">Review Analytics</Button>
+                       <Button className="bg-slate-900 hover:bg-slate-800 h-16 px-10 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-slate-200">Launch Virtual Clinic</Button>
+                       <Button variant="outline" className="h-16 px-10 rounded-2xl border-slate-200 font-black text-lg hover:bg-slate-50 transition-all active:scale-95">Export HIPAA Logs</Button>
                     </div>
                  </div>
-                 <div className="w-full md:w-1/3 relative">
-                    <img src={IMAGES.dashboard} className="rounded-[32px] shadow-2xl border-8 border-white" alt="Provider Stats" />
+                 <div className="w-full lg:w-2/5 relative">
+                    <img src={IMAGES.dashboard} className="rounded-[40px] shadow-[0_32px_64px_rgba(0,0,0,0.1)] border-8 border-white" alt="Dashboard Stats" />
                  </div>
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                  {[
-                   { label: 'Active Patients', val: '1,248', icon: <Users className="w-5 h-5" />, color: 'blue', change: '+5.4%' },
-                   { label: 'Health Score', val: '84/100', icon: <Activity className="w-5 h-5" />, color: 'emerald', change: '+2.1%' },
-                   { label: 'Edu Completion', val: '68%', icon: <BookOpen className="w-5 h-5" />, color: 'amber', change: '+12.5%' },
-                   { label: 'Verified Blocks', val: '8.4k', icon: <Database className="w-5 h-5" />, color: 'cyan', change: '+3.2%' },
+                   { label: 'Total Patients', val: '4,892', icon: <Users className="w-5 h-5" />, color: 'cyan', change: '+12%' },
+                   { label: 'Verified Records', val: '124k', icon: <ShieldCheck className="w-5 h-5" />, color: 'emerald', change: '+4.2k' },
+                   { label: 'Response Rate', val: '98.4%', icon: <Activity className="w-5 h-5" />, color: 'purple', change: '+2.1%' },
+                   { label: 'Risk Flags', val: '12', icon: <ShieldAlert className="w-5 h-5" />, color: 'red', change: '-4' },
                  ].map((stat, i) => (
-                   <Card key={i} className="border-none shadow-sm rounded-[32px] group hover:shadow-lg transition-all">
+                   <Card key={i} className="border-none shadow-sm rounded-[32px] p-2 hover:shadow-xl transition-all group bg-white">
                       <CardContent className="p-8">
                          <div className="flex justify-between items-start">
-                            <div className={`p-3.5 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:bg-${stat.color}-600 group-hover:text-white transition-colors`}>
+                            <div className={`p-4 rounded-2xl transition-all ${
+                              stat.color === 'cyan' ? 'bg-cyan-50 text-cyan-600' : 
+                              stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' : 
+                              stat.color === 'purple' ? 'bg-purple-50 text-purple-600' : 
+                              'bg-red-50 text-red-600'
+                            } group-hover:bg-slate-900 group-hover:text-white`}>
                                {stat.icon}
                             </div>
-                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{stat.change} \u2191</span>
+                            <Badge variant="outline" className="font-black text-[9px] border-emerald-100 text-emerald-600">{stat.change}</Badge>
                          </div>
-                         <p className="text-xs font-black text-slate-400 uppercase mt-6 tracking-[0.1em]">{stat.label}</p>
-                         <p className="text-3xl font-black text-slate-900">{stat.val}</p>
+                         <p className="text-[11px] font-black text-slate-400 uppercase mt-8 tracking-widest">{stat.label}</p>
+                         <p className="text-4xl font-black text-slate-900 mt-1 tracking-tighter">{stat.val}</p>
                       </CardContent>
                    </Card>
                  ))}
               </div>
+          </div>
+        );
+      case 'security':
+        return (
+          <div className="space-y-8">
+             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                   <h2 className="text-4xl font-black text-slate-900">Security & Compliance</h2>
+                   <p className="text-slate-500 font-medium">Monitoring international data standards and PHI integrity.</p>
+                </div>
+                <div className="flex gap-4">
+                   <Badge className="h-10 px-4 bg-emerald-50 text-emerald-700 border-none font-black flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4" /> HIPAA COMPLIANT
+                   </Badge>
+                   <Badge className="h-10 px-4 bg-cyan-50 text-cyan-700 border-none font-black flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4" /> GDPR PROTECTED
+                   </Badge>
+                </div>
+             </div>
 
-              <div className="grid lg:grid-cols-3 gap-8">
-                 <Card className="lg:col-span-2 border-none shadow-sm rounded-[40px] overflow-hidden">
-                    <CardHeader className="p-8">
-                       <div className="flex items-center justify-between">
-                          <div>
-                             <CardTitle className="text-2xl font-black">High-Priority Patient Census</CardTitle>
-                             <CardDescription className="font-medium">Patients flagged by AI for immediate clinical review.</CardDescription>
-                          </div>
-                          <Button variant="ghost" className="text-cyan-600 font-black hover:bg-cyan-50">View All Patients</Button>
-                       </div>
-                    </CardHeader>
-                    <CardContent className="p-8 pt-0">
-                       <div className="space-y-4">
-                          {[
-                            { name: "Kwesi Mensah", condition: "Diabetes Type II", score: 92, risk: "High" },
-                            { name: "Ayo Balogun", condition: "Hypertension", score: 84, risk: "High" },
-                            { name: "Fatima Ahmed", condition: "Prenatal Care", score: 45, risk: "Low" },
-                            { name: "John Okafor", condition: "Post-Op Recovery", score: 78, risk: "Medium" },
-                          ].map((p, i) => (
-                            <div key={i} className="flex items-center justify-between p-6 rounded-[28px] bg-slate-50/50 hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-slate-100 transition-all group">
-                               <div className="flex items-center gap-5">
-                                  <Avatar className="w-14 h-14 border-2 border-white shadow-sm">
-                                     <AvatarFallback className="bg-slate-200 text-slate-500 font-black text-lg">{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                  </Avatar>
+             <div className="grid lg:grid-cols-3 gap-8">
+                <Card className="lg:col-span-2 border-none shadow-sm rounded-[40px] overflow-hidden bg-white">
+                   <CardHeader className="p-10 border-b border-slate-50">
+                      <CardTitle className="text-2xl font-black">Encryption Activity Log</CardTitle>
+                   </CardHeader>
+                   <CardContent className="p-0">
+                      <div className="divide-y divide-slate-50">
+                         {[1,2,3,4,5].map(i => (
+                            <div key={i} className="p-8 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                               <div className="flex items-center gap-6">
+                                  <div className="p-3 bg-slate-100 rounded-xl text-slate-500">
+                                     <FileLock2 className="w-5 h-5" />
+                                  </div>
                                   <div>
-                                     <p className="font-black text-slate-900 text-lg">{p.name}</p>
-                                     <p className="text-sm font-medium text-slate-500">{p.condition}</p>
+                                     <p className="font-black text-slate-900">Patient Record Encryption</p>
+                                     <p className="text-xs font-mono text-slate-400">ID: 0x82f...{i}9b | AES-256-GCM</p>
                                   </div>
                                </div>
-                               <div className="flex items-center gap-10">
-                                  <div className="text-right hidden sm:block">
-                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">AI Risk Score</p>
-                                     <p className={`text-xl font-black ${
-                                       p.score > 80 ? 'text-red-500' : p.score > 50 ? 'text-amber-500' : 'text-emerald-500'
-                                     }`}>{p.score}%</p>
-                                  </div>
-                                  <Button size="lg" variant="outline" className="rounded-2xl font-black border-slate-200 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-all">Review Record</Button>
+                               <div className="text-right">
+                                  <p className="text-xs font-black text-emerald-600">SECURE</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">{i * 2} mins ago</p>
                                </div>
                             </div>
-                          ))}
-                       </div>
-                    </CardContent>
-                 </Card>
+                         ))}
+                      </div>
+                   </CardContent>
+                </Card>
 
-                 <div className="space-y-8">
-                    <Card className="border-none shadow-2xl rounded-[40px] bg-slate-900 text-white overflow-hidden relative">
-                       <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/30 to-transparent" />
-                       <CardHeader className="relative z-10 p-8">
-                          <CardTitle className="flex items-center gap-3">
-                             <div className="p-2.5 rounded-2xl bg-white/10">
-                                <ShieldAlert className="w-6 h-6 text-cyan-400" />
-                             </div>
-                             Blockchain Integrity
-                          </CardTitle>
-                          <CardDescription className="text-slate-400 font-medium">Verification status for St. Peter's Hospital</CardDescription>
-                       </CardHeader>
-                       <CardContent className="relative z-10 p-8 pt-0 space-y-6">
-                          <div className="p-6 rounded-3xl bg-white/5 border border-white/10">
-                             <div className="flex items-center justify-between mb-4">
-                                <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Mainnet Status</p>
-                                <Badge className="bg-emerald-500/20 text-emerald-400 border-none font-black text-[9px]">OPERATIONAL</Badge>
-                             </div>
-                             <p className="text-xs font-mono text-slate-300 mb-2 truncate">Block: 19,482,105</p>
-                             <Progress value={100} className="h-1.5 bg-white/10 [&>div]:bg-cyan-500" />
-                          </div>
-                          <Button className="w-full h-14 bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-2xl shadow-xl shadow-cyan-900/20 transition-transform active:scale-95">
-                             Verify Node Sync
-                          </Button>
-                       </CardContent>
-                    </Card>
+                <Card className="bg-slate-950 text-white border-none rounded-[40px] p-10 relative overflow-hidden">
+                   <div className="absolute inset-0 opacity-20 pointer-events-none">
+                      <img src={IMAGES.blockchain} className="w-full h-full object-cover" alt="Security Bg" />
+                   </div>
+                   <div className="relative z-10">
+                     <div className="flex items-center gap-4 mb-10">
+                        <div className="p-3 bg-cyan-500 rounded-2xl">
+                           <Terminal className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-xl font-black">Security Health</h3>
+                     </div>
 
-                    <Card className="border-none shadow-sm rounded-[40px] overflow-hidden">
-                       <CardHeader className="p-8">
-                          <CardTitle className="text-xl font-black">Upcoming Telemedicine</CardTitle>
-                       </CardHeader>
-                       <CardContent className="p-8 pt-0 space-y-4">
-                          {[
-                            { time: "10:30 AM", patient: "Kwesi M.", type: "Video Hub" },
-                            { time: "11:15 AM", patient: "Sarah L.", type: "Virtual Chat" },
-                          ].map((item, i) => (
-                             <div key={i} className="flex items-center gap-5 p-5 rounded-3xl bg-slate-50 border border-slate-100/50 hover:shadow-md transition-all">
-                                <div className="bg-white p-3 rounded-2xl text-cyan-600 shadow-sm">
-                                   <Video className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                   <p className="font-black text-slate-900">{item.patient}</p>
-                                   <p className="text-xs font-bold text-slate-400">{item.time} \u2022 {item.type}</p>
-                                </div>
-                                <Button size="sm" className="h-10 bg-cyan-600 font-black rounded-xl">Join</Button>
-                             </div>
-                          ))}
-                       </CardContent>
-                    </Card>
-                 </div>
-              </div>
+                     <div className="space-y-8">
+                        <div className="space-y-3">
+                           <div className="flex justify-between text-sm">
+                              <span className="font-bold text-slate-400">Encryption Status</span>
+                              <span className="font-black text-emerald-400">100%</span>
+                           </div>
+                           <Progress value={100} className="h-2 bg-white/10 [&>div]:bg-emerald-500" />
+                        </div>
+                        <div className="space-y-3">
+                           <div className="flex justify-between text-sm">
+                              <span className="font-bold text-slate-400">Blockchain Sync</span>
+                              <span className="font-black text-cyan-400">92% Synchronized</span>
+                           </div>
+                           <Progress value={92} className="h-2 bg-white/10 [&>div]:bg-cyan-500" />
+                        </div>
+                        <div className="space-y-3">
+                           <div className="flex justify-between text-sm">
+                              <span className="font-bold text-slate-400">Access Control</span>
+                              <span className="font-black text-amber-400">MFA Active</span>
+                           </div>
+                           <Progress value={100} className="h-2 bg-white/10 [&>div]:bg-amber-500" />
+                        </div>
+                     </div>
+
+                     <Button className="w-full mt-12 h-14 bg-white text-slate-900 hover:bg-slate-100 font-black rounded-2xl shadow-xl shadow-cyan-900/20">
+                        Rotate Secret Keys
+                     </Button>
+                   </div>
+                </Card>
+             </div>
           </div>
         );
       case 'ledger':
         return <BlockchainLedger />;
-      case 'staff':
+      case 'org':
         return (
           <div className="space-y-8">
              <div className="flex items-center justify-between">
                 <div>
-                   <h1 className="text-3xl font-black text-slate-900">Staff Management</h1>
-                   <p className="text-slate-500 font-medium">Manage roles and access permissions for medical staff.</p>
+                   <h2 className="text-4xl font-black text-slate-900">Organization Admin</h2>
+                   <p className="text-slate-500 font-medium">Manage staff roles, institutional billing, and high-level configuration.</p>
                 </div>
-                <Button className="bg-slate-900 h-14 px-8 rounded-2xl font-black shadow-xl">Onboard New Staff</Button>
+                <Button className="bg-slate-900 h-14 px-8 rounded-2xl font-black">
+                  <UserCog className="w-5 h-5 mr-2" /> Invite Staff
+                </Button>
              </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { name: 'Dr. Sarah K.', role: 'Senior Consultant', patients: 45, access: 'Full' },
-                  { name: 'Nurse Michael O.', role: 'Nurse Practitioner', patients: 82, access: 'Standard' },
-                  { name: 'Dr. Jane D.', role: 'Junior Resident', patients: 12, access: 'Restricted' },
-                ].map((staff, i) => (
-                  <Card key={i} className="border-none shadow-sm rounded-[32px] p-8">
-                     <div className="flex items-center gap-5 mb-8">
-                        <Avatar className="w-16 h-16">
-                           <AvatarFallback className="bg-slate-100 text-slate-900 font-black">{staff.name.charAt(4)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                           <p className="text-lg font-black text-slate-900">{staff.name}</p>
-                           <p className="text-sm font-medium text-slate-500">{staff.role}</p>
+
+             <div className="grid lg:grid-cols-3 gap-8">
+                <Card className="border-none shadow-sm rounded-[32px] p-10 bg-white">
+                   <h3 className="text-xl font-black mb-6">Staff Roles</h3>
+                   <div className="space-y-4">
+                      {[
+                        { name: 'Dr. Osei Tutu', role: 'Super Admin', icon: <ShieldCheck className="w-4 h-4" /> },
+                        { name: 'Dr. Sarah Ibrahim', role: 'Clinician', icon: <Stethoscope className="w-4 h-4" /> },
+                        { name: 'James Adeyemi', role: 'Admin', icon: <UserCog className="w-4 h-4" /> }
+                      ].map((staff, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                           <div className="flex items-center gap-3">
+                             <div className="p-2 bg-white rounded-xl text-cyan-600">{staff.icon}</div>
+                             <div>
+                               <p className="font-bold text-slate-900 text-sm">{staff.name}</p>
+                               <p className="text-[10px] text-slate-400 font-black uppercase">{staff.role}</p>
+                             </div>
+                           </div>
+                           <Button variant="ghost" size="sm" className="text-[10px] font-black">MANAGE</Button>
                         </div>
-                     </div>
-                     <div className="space-y-4 mb-8">
-                        <div className="flex justify-between">
-                           <span className="text-sm text-slate-400 font-bold">Active Patients</span>
-                           <span className="text-sm text-slate-900 font-black">{staff.patients}</span>
+                      ))}
+                   </div>
+                   <Button variant="outline" className="w-full mt-8 h-12 rounded-xl border-slate-200 font-black">View All Personnel</Button>
+                </Card>
+                
+                <Card className="border-none shadow-sm rounded-[32px] p-10 bg-white">
+                   <h3 className="text-xl font-black mb-6">Institutional Billing</h3>
+                   <div className="space-y-6">
+                      <div className="p-6 rounded-[24px] bg-slate-900 text-white">
+                         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Active Balance</p>
+                         <p className="text-3xl font-black">$24,850.00</p>
+                         <div className="mt-4 flex items-center gap-2 text-[10px] font-black text-emerald-400">
+                           <Activity className="w-3 h-3" /> +12% from last month
+                         </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-2xl bg-slate-50">
+                           <p className="text-[10px] font-black text-slate-400 uppercase">Licenses</p>
+                           <p className="text-xl font-black">120 / 150</p>
                         </div>
-                        <div className="flex justify-between">
-                           <span className="text-sm text-slate-400 font-bold">Access Level</span>
-                           <Badge className="bg-slate-100 text-slate-700 font-black uppercase text-[9px] border-none">{staff.access}</Badge>
+                        <div className="p-4 rounded-2xl bg-slate-50">
+                           <p className="text-[10px] font-black text-slate-400 uppercase">Requests</p>
+                           <p className="text-xl font-black">8.4k</p>
                         </div>
-                     </div>
-                     <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 font-black">Edit Permissions</Button>
-                  </Card>
-                ))}
+                      </div>
+                   </div>
+                   <Button className="w-full mt-8 h-12 rounded-xl bg-cyan-600 hover:bg-cyan-700 font-black shadow-lg shadow-cyan-100">Upgrade Plan</Button>
+                </Card>
+
+                <Card className="border-none shadow-sm rounded-[32px] p-10 bg-white">
+                   <h3 className="text-xl font-black mb-6">Audit & Compliance</h3>
+                   <div className="space-y-4">
+                      {[
+                        'Last HIPAA Audit: 2 days ago',
+                        'Encryption Rotation: Successful',
+                        'Node Sync: Primary Cluster',
+                        'Access Log: 0 Anomalies'
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                           <ClipboardCheck className="w-5 h-5 text-emerald-500" />
+                           <span className="text-sm font-bold text-slate-600">{item}</span>
+                        </div>
+                      ))}
+                   </div>
+                   <Button variant="ghost" className="w-full mt-8 h-12 rounded-xl font-black text-cyan-600">Download Certificate</Button>
+                </Card>
              </div>
           </div>
         );
@@ -251,25 +290,28 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
   };
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
-      {/* Desktop Sidebar */}
-      <aside className="w-72 border-r border-slate-200 bg-white flex flex-col hidden lg:flex">
-        <div className="p-8 flex items-center gap-3">
-          <div className="bg-cyan-600 p-2.5 rounded-2xl shadow-xl shadow-cyan-100">
-            <Stethoscope className="w-6 h-6 text-white" />
+    <div className="flex h-screen bg-slate-50/30 overflow-hidden font-sans">
+      {/* Modern Slim Sidebar */}
+      <aside className="w-80 border-r border-slate-100 bg-white flex flex-col hidden lg:flex relative z-30">
+        <div className="p-10 flex items-center gap-4">
+          <div className="bg-slate-950 p-3 rounded-2xl shadow-xl shadow-slate-200">
+            <Stethoscope className="w-7 h-7 text-white" />
           </div>
-          <span className="text-2xl font-black text-slate-900 tracking-tighter">ProviderHub</span>
+          <div className="flex flex-col">
+            <span className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Gembe</span>
+            <span className="text-[10px] font-black text-cyan-600 uppercase tracking-[0.2em]">{role.replace('_', ' ')}</span>
+          </div>
         </div>
         
-        <ScrollArea className="flex-1 px-4">
-          <nav className="py-4 space-y-2">
-            {sidebarItems.map(item => (
+        <ScrollArea className="flex-1 px-6">
+          <nav className="py-6 space-y-2">
+            {visibleSidebarItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-[20px] text-sm font-black transition-all ${
+                className={`w-full flex items-center gap-4 px-6 py-5 rounded-[24px] text-sm font-black transition-all ${
                   activeTab === item.id 
-                  ? 'bg-slate-900 text-white shadow-2xl shadow-slate-200' 
+                  ? 'bg-slate-950 text-white shadow-2xl shadow-slate-300' 
                   : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
@@ -280,53 +322,55 @@ export const ProviderDashboard = ({ role = 'provider', onLogout }: { role?: Prov
           </nav>
         </ScrollArea>
 
-        <div className="p-8 border-t border-slate-100">
-           <div className="flex items-center gap-4 p-4 rounded-[28px] bg-slate-50 mb-6">
-              <Avatar className="w-12 h-12 border-2 border-white shadow-sm">
-                <AvatarFallback className="bg-cyan-100 text-cyan-700 font-black">DR</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-black text-slate-900">Dr. Osei Tutu</p>
-                <Badge variant="outline" className="text-[10px] uppercase font-black py-0.5 px-2 border-cyan-200 text-cyan-700">
-                  {role.replace('_', ' ')}
-                </Badge>
+        <div className="p-10">
+           <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 mb-8">
+              <div className="flex items-center gap-4 mb-4">
+                <Avatar className="w-12 h-12 border-2 border-white shadow-sm">
+                  <AvatarFallback className="bg-cyan-100 text-cyan-700 font-black">AD</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-black text-slate-900">Dr. Osei Tutu</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{role.replace('_', ' ')}</p>
+                </div>
               </div>
+              <Button 
+                onClick={onLogout}
+                variant="ghost"
+                className="w-full h-10 flex items-center gap-2 rounded-xl font-black text-red-500 hover:bg-red-50 transition-all text-xs"
+              >
+                <LogOut className="w-4 h-4" /> Log Out
+              </Button>
            </div>
-           <Button 
-            onClick={onLogout}
-            variant="ghost"
-            className="w-full h-12 flex items-center gap-3 rounded-xl font-black text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all"
-           >
-              <LogOut className="w-5 h-5" /> Sign Out
-           </Button>
+           <div className="flex items-center justify-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mainnet Node Active</span>
+           </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-20 border-b border-slate-100 bg-white/80 backdrop-blur-xl flex items-center justify-between px-10 z-20">
-           <div className="flex items-center gap-6">
-              <h2 className="text-xl font-black text-slate-900">Institutional Command Center</h2>
-              <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none font-black text-[10px]">St. Peter's Hospital</Badge>
-           </div>
-           <div className="flex items-center gap-4">
+        <header className="h-24 flex items-center justify-between px-12 z-20 bg-white/70 backdrop-blur-xl border-b border-slate-100">
+           <div className="flex items-center gap-8">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input placeholder="Search patient records..." className="w-64 pl-10 h-11 bg-slate-50 border-none rounded-2xl hidden md:block" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input placeholder="Secure lookup..." className="w-96 pl-12 h-14 bg-slate-50/50 border-none shadow-inner rounded-[24px] hidden md:block focus-visible:ring-cyan-500" />
               </div>
-              <Button variant="ghost" size="icon" className="text-slate-400 bg-slate-50 rounded-xl relative">
-                 <Bell className="w-5 h-5" />
-                 <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+           </div>
+           <div className="flex items-center gap-6">
+              <Button variant="ghost" size="icon" className="w-14 h-14 text-slate-400 bg-slate-50 rounded-2xl relative">
+                 <Bell className="w-6 h-6" />
+                 <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-slate-400 bg-slate-50 rounded-xl">
-                 <Settings className="w-5 h-5" />
+              <Button className="h-14 px-8 bg-cyan-600 hover:bg-cyan-700 text-white font-black rounded-2xl shadow-xl shadow-cyan-100 transition-all">
+                 New Clinical Record
               </Button>
            </div>
         </header>
 
-        <ScrollArea className="flex-1 bg-[#F8FAFC]">
-           <div className="max-w-7xl mx-auto p-10">
+        <ScrollArea className="flex-1 bg-slate-50/50">
+           <div className="max-w-7xl mx-auto p-12 pb-32">
               {renderContent()}
            </div>
         </ScrollArea>
